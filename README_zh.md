@@ -28,7 +28,7 @@ on:
 
 jobs:
   coverage:
-    uses: hongjr03/tinymist-coverage-workflow/.github/workflows/tinymist-coverage.yml@main
+    uses: hongjr03/tinymist-coverage-workflow@v0.1.0
     with:
       target_files: 'README.typ'  # 您的主要 Typst 文件
 ```
@@ -51,7 +51,7 @@ jobs:
 ```yaml
 jobs:
   coverage:
-    uses: hongjr03/tinymist-coverage-workflow/.github/workflows/tinymist-coverage.yml@main
+    uses: hongjr03/tinymist-coverage-workflow@v0.1.0
     with:
       tinymist_version: 'latest'
       setup_typship: false

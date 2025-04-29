@@ -10,7 +10,7 @@ on:
 jobs:
   coverage:
     name: Run Coverage Analysis
-    uses: username/tinymist-coverage-workflow/.github/workflows/tinymist-coverage.yml@main
+    uses: hongjr03/tinymist-coverage-workflow@v0.1.0
     with:
       # Just use the default settings
       target_files: 'README.typ'
