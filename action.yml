@@ -9,8 +9,8 @@ inputs:
     description: "Tinymist version to use"
     required: false
     default: "latest"
-  setup_typship:
-    description: "Whether to setup typship development environment"
+  create_symlinks:
+    description: "Whether to create symlinks for local Typst package development"
     required: false
     default: "true"
   target_files:
@@ -51,19 +51,6 @@ runs:
         restore-keys: |
           ${{ runner.os }}-cargo-
 
-    # Install typship if needed
-    - name: Install typship
-      shell: bash
-      run: |
-        if [ "${{ inputs.setup_typship }}" = "true" ]; then
-          if ! command -v typship &> /dev/null; then
-            echo "Installing typship..."
-            cargo install typship
-          else
-            echo "typship is already installed"
-          fi
-        fi
-
     # Install Tinymist
     - name: Install Tinymist
       shell: bash
@@ -80,12 +67,50 @@ runs:
           echo "tinymist is already installed"
         fi
 
-    # Setup development environment (optional)
-    - name: Setup development environment
+    # Create symlinks for local Typst package development
+    - name: Create symlinks for local Typst package
       shell: bash
+      if: ${{ inputs.create_symlinks == 'true' }}
       run: |
-        if [ "${{ inputs.setup_typship }}" = "true" ]; then
-          typship dev
+        echo "Creating symlinks for local Typst package development..."
+        
+        # Check if typst.toml exists
+        if [ -f "typst.toml" ]; then
+          # Read package name and version from typst.toml
+          PACKAGE_NAME=$(grep -Po '^name = "\K[^"]*' typst.toml || echo "unknown")
+          PACKAGE_VERSION=$(grep -Po '^version = "\K[^"]*' typst.toml || echo "0.1.0")
+          
+          echo "Package: $PACKAGE_NAME, Version: $PACKAGE_VERSION"
+          
+          # Create local preview directory
+          TYPST_LOCAL_DIR="${HOME}/.local/share/typst"
+          PREVIEW_DIR="${TYPST_LOCAL_DIR}/preview/${PACKAGE_NAME}"
+          VERSION_DIR="${PREVIEW_DIR}/${PACKAGE_VERSION}"
+          
+          # Create directories if they don't exist
+          mkdir -p "$PREVIEW_DIR"
+          
+          # Clean up existing symlink if it exists
+          if [ -L "$VERSION_DIR" ]; then
+            echo "Removing existing symlink: $VERSION_DIR"
+            rm "$VERSION_DIR"
+          elif [ -e "$VERSION_DIR" ]; then
+            echo "Warning: $VERSION_DIR exists but is not a symlink"
+          fi
+          
+          # Create symlink
+          echo "Creating symlink: $(pwd) -> $VERSION_DIR"
+          ln -sf "$(pwd)" "$VERSION_DIR"
+          
+          # Verify symlink
+          if [ -L "$VERSION_DIR" ]; then
+            echo "Symlink created successfully"
+          else
+            echo "Failed to create symlink"
+            exit 1
+          fi
+        else
+          echo "No typst.toml found, skipping symlink creation"
         fi
 
     # Create report directory

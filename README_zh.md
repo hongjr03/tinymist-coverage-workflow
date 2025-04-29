@@ -47,7 +47,7 @@ jobs:
 | 输入参数 | 描述 | 默认值 |
 |---------|------|--------|
 | `tinymist_version` | 使用的 Tinymist 版本 | `latest` |
-| `setup_typship` | 是否设置 typship 开发环境 | `true` |
+| `create_symlinks` | 是否为本地 Typst 包开发创建软链接 | `true` |
 | `target_files` | 要分析的文件（逗号分隔） | `README.typ` |
 | `report_path` | 存储覆盖率报告的路径 | `coverage/output` |
 | `auto_commit` | 是否自动提交报告更新 | `true` |
@@ -68,7 +68,7 @@ jobs:
       - uses: hongjr03/tinymist-coverage-workflow@v0.1.4
         with:
           tinymist_version: 'latest'
-          setup_typship: false
+          create_symlinks: false
           target_files: 'main.typ,docs/guide.typ'
           report_path: 'docs/coverage'
           auto_commit: false
@@ -89,11 +89,12 @@ jobs:
 ## 工作原理
 
 1. 工作流安装 Tinymist 和其他必要的依赖项
-2. 它对您指定的文件运行覆盖率分析
-3. 生成详细的覆盖率报告
-4. README 文件使用覆盖率徽章进行更新
-5. 更改被提交回仓库（如果启用了 auto_commit）
-6. 报告作为工作流构件上传
+2. 如果启用，它会为本地 Typst 包创建软链接（用于包开发）
+3. 它对您指定的文件运行覆盖率分析
+4. 生成详细的覆盖率报告
+5. README 文件使用覆盖率徽章进行更新
+6. 更改被提交回仓库（如果启用了 auto_commit）
+7. 报告作为工作流构件上传
 
 ## 许可证
 
