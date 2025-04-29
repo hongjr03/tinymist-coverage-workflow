@@ -1,6 +1,6 @@
 # Tinymist Coverage Workflow
 
-A reusable GitHub Actions workflow for generating and tracking coverage reports for Typst documents using Tinymist.
+A reusable GitHub Actions workflow for generating and tracking code coverage for Typst documents using Tinymist.
 
 ## Features
 
@@ -30,7 +30,12 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: hongjr03/tinymist-coverage-workflow@v0.1.3
+      # First checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      # Then run Tinymist Coverage workflow
+      - uses: hongjr03/tinymist-coverage-workflow@v0.1.4
         with:
           target_files: 'README.typ'  # Your main Typst file
 ```
@@ -55,9 +60,14 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: hongjr03/tinymist-coverage-workflow@v0.1.3
+      # First checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      # Then run Tinymist Coverage workflow
+      - uses: hongjr03/tinymist-coverage-workflow@v0.1.4
         with:
-          tinymist_version: 'v0.13.10'
+          tinymist_version: 'latest'
           setup_typship: false
           target_files: 'main.typ,docs/guide.typ'
           report_path: 'docs/coverage'

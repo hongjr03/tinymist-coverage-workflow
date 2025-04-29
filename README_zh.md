@@ -30,7 +30,12 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: hongjr03/tinymist-coverage-workflow@v0.1.3
+      # 首先检出代码
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      # 然后运行 Tinymist 覆盖率工作流
+      - uses: hongjr03/tinymist-coverage-workflow@v0.1.4
         with:
           target_files: 'README.typ'  # 您的主要 Typst 文件
 ```
@@ -55,7 +60,12 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: hongjr03/tinymist-coverage-workflow@v0.1.3
+      # 首先检出代码
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      # 然后运行 Tinymist 覆盖率工作流
+      - uses: hongjr03/tinymist-coverage-workflow@v0.1.4
         with:
           tinymist_version: 'latest'
           setup_typship: false
