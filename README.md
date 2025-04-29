@@ -35,7 +35,7 @@ jobs:
         uses: actions/checkout@v4
         
       # Then run Tinymist Coverage workflow
-      - uses: hongjr03/tinymist-coverage-workflow@v0.1.4
+      - uses: hongjr03/tinymist-coverage-workflow@v0.1.5
         with:
           target_files: 'README.typ'  # Your main Typst file
 ```
@@ -65,7 +65,7 @@ jobs:
         uses: actions/checkout@v4
         
       # Then run Tinymist Coverage workflow
-      - uses: hongjr03/tinymist-coverage-workflow@v0.1.4
+      - uses: hongjr03/tinymist-coverage-workflow@v0.1.5
         with:
           tinymist_version: 'latest'
           create_symlinks: false
