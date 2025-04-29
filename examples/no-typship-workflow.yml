@@ -12,7 +12,12 @@ jobs:
     name: Run Coverage Analysis
     runs-on: ubuntu-latest
     steps:
-      - uses: hongjr03/tinymist-coverage-workflow@v0.1.2
+      # First checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      # Then run Tinymist Coverage workflow
+      - uses: hongjr03/tinymist-coverage-workflow@v0.1.3
         with:
           # Disable typship development environment setup
           setup_typship: false
