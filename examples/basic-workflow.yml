@@ -12,7 +12,7 @@ jobs:
     name: Run Coverage Analysis
     runs-on: ubuntu-latest
     steps:
-      - uses: hongjr03/tinymist-coverage-workflow@v0.1.0
+      - uses: hongjr03/tinymist-coverage-workflow@v0.1.2
         with:
           # Just use the default settings
           target_files: 'README.typ'

@@ -30,7 +30,7 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: hongjr03/tinymist-coverage-workflow@v0.1.0
+      - uses: hongjr03/tinymist-coverage-workflow@v0.1.2
         with:
           target_files: 'README.typ'  # Your main Typst file
 ```
@@ -55,7 +55,7 @@ jobs:
   coverage:
     runs-on: ubuntu-latest
     steps:
-      - uses: hongjr03/tinymist-coverage-workflow@v0.1.0
+      - uses: hongjr03/tinymist-coverage-workflow@v0.1.2
         with:
           tinymist_version: 'v0.13.10'
           setup_typship: false
