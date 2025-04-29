@@ -13,16 +13,18 @@ on:
 jobs:
   coverage:
     name: Run Advanced Coverage Analysis
-    uses: hongjr03/tinymist-coverage-workflow@v0.1.0
-    with:
-      # Use latest Tinymist version
-      tinymist_version: 'latest'
-      # Analyze multiple files
-      target_files: 'main.typ,docs/guide.typ,examples/demo.typ'
-      # Custom report path
-      report_path: 'docs/coverage-reports'
-      # Only update badge in README.md
-      readme_paths: 'README.md'
-    secrets:
-      # Optional: Use custom token for committing changes
-      GITHUB_TOKEN: ${{ secrets.CUSTOM_GH_TOKEN }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: hongjr03/tinymist-coverage-workflow@v0.1.0
+        with:
+          # Use latest Tinymist version
+          tinymist_version: 'latest'
+          # Analyze multiple files
+          target_files: 'main.typ,docs/guide.typ,examples/demo.typ'
+          # Custom report path
+          report_path: 'docs/coverage-reports'
+          # Only update badge in README.md
+          readme_paths: 'README.md'
+        env:
+          # Optional: Use custom token for committing changes
+          GITHUB_TOKEN: ${{ secrets.CUSTOM_GH_TOKEN }}

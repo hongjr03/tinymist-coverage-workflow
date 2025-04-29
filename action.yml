@@ -1,43 +1,264 @@
-name: 'Tinymist Coverage Analysis'
-description: 'Generate and track code coverage for Typst documents using Tinymist'
-author: 'hongjr03'
+name: "Tinymist Coverage Analysis"
+description: "Generate and track code coverage for Typst documents using Tinymist"
+author: "hongjr03"
 branding:
-  icon: 'bar-chart-2'
-  color: 'blue'
+  icon: "bar-chart-2"
+  color: "blue"
 inputs:
   tinymist_version:
-    description: 'Tinymist version to use'
+    description: "Tinymist version to use"
     required: false
-    default: 'latest'
+    default: "latest"
   setup_typship:
-    description: 'Whether to setup typship development environment'
+    description: "Whether to setup typship development environment"
     required: false
-    default: 'true'
+    default: "true"
   target_files:
-    description: 'Files to analyze for coverage (comma separated list)'
+    description: "Files to analyze for coverage (comma separated list)"
     required: false
-    default: 'README.typ'
+    default: "README.typ"
   report_path:
-    description: 'Path to store coverage reports'
+    description: "Path to store coverage reports"
     required: false
-    default: 'coverage/output'
+    default: "coverage/output"
   auto_commit:
-    description: 'Whether to automatically commit coverage report updates'
+    description: "Whether to automatically commit coverage report updates"
     required: false
-    default: 'true'
+    default: "true"
   readme_paths:
-    description: 'Paths to README files to update with coverage badge (comma separated)'
+    description: "Paths to README files to update with coverage badge (comma separated)"
     required: false
-    default: 'README.md,README_zh.md'
+    default: "README.md"
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
-    - name: Run Tinymist Coverage Workflow
-      uses: ./.github/workflows/tinymist-coverage.yml
+    # Install system dependencies
+    - name: Install system dependencies
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y bc jq
+
+    # Cache Rust tools
+    - name: Cache Rust tools
+      uses: actions/cache@v4
       with:
-        tinymist_version: ${{ inputs.tinymist_version }}
-        setup_typship: ${{ inputs.setup_typship }}
-        target_files: ${{ inputs.target_files }}
-        report_path: ${{ inputs.report_path }}
-        auto_commit: ${{ inputs.auto_commit }}
-        readme_paths: ${{ inputs.readme_paths }}
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/
+          ~/.cargo/git/
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') || hashFiles('**/Cargo.toml') || github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-
+
+    # Install typship if needed
+    - name: Install typship
+      shell: bash
+      run: |
+        if [ "${{ inputs.setup_typship }}" = "true" ]; then
+          if ! command -v typship &> /dev/null; then
+            echo "Installing typship..."
+            cargo install typship
+          else
+            echo "typship is already installed"
+          fi
+        fi
+
+    # Install Tinymist
+    - name: Install Tinymist
+      shell: bash
+      run: |
+        if ! command -v tinymist &> /dev/null; then
+          if [ "${{ inputs.tinymist_version }}" = "latest" ]; then
+            echo "Installing latest tinymist version..."
+            curl --proto '=https' --tlsv1.2 -LsSf https://github.com/Myriad-Dreamin/tinymist/releases/latest/download/tinymist-installer.sh | sh
+          else
+            echo "Installing tinymist version ${{ inputs.tinymist_version }}..."
+            curl --proto '=https' --tlsv1.2 -LsSf https://github.com/Myriad-Dreamin/tinymist/releases/download/${{ inputs.tinymist_version }}/tinymist-installer.sh | sh
+          fi
+        else
+          echo "tinymist is already installed"
+        fi
+
+    # Setup development environment (optional)
+    - name: Setup development environment
+      shell: bash
+      run: |
+        if [ "${{ inputs.setup_typship }}" = "true" ]; then
+          typship dev
+        fi
+
+    # Create report directory
+    - name: Create report directory
+      shell: bash
+      run: mkdir -p ${{ inputs.report_path }}
+
+    # Parse input files
+    - name: Parse input files
+      shell: bash
+      run: |
+        echo "TARGET_FILES=$(echo "${{ inputs.target_files }}" | tr ',' ' ')" >> $GITHUB_ENV
+        echo "README_FILES=$(echo "${{ inputs.readme_paths }}" | tr ',' ' ')" >> $GITHUB_ENV
+
+    # Run coverage analysis
+    - name: Run coverage analysis
+      shell: bash
+      run: |
+        for target in $TARGET_FILES; do
+          echo "Running coverage analysis for $target..."
+          tinymist cov $target
+        done
+
+    # Analyze coverage data
+    - name: Analyze coverage data
+      shell: bash
+      run: |
+        # Copy coverage.json to output directory
+        cp target/coverage.json ${{ inputs.report_path }}/coverage.json
+
+        # Analyze coverage data
+        echo "Analyzing coverage data..."
+
+        # Calculate coverage statistics
+        TOTAL_EXECUTED=0
+        TOTAL_NOT_EXECUTED=0
+
+        echo "# Tinymist Coverage Report" > ${{ inputs.report_path }}/coverage_report.md
+        echo "" >> ${{ inputs.report_path }}/coverage_report.md
+        echo "| File | Executed | Not Executed | Total | Coverage |" >> ${{ inputs.report_path }}/coverage_report.md
+        echo "|------|--------|--------|------|--------|" >> ${{ inputs.report_path }}/coverage_report.md
+
+        # Process JSON file using jq
+        for file_path in $(jq -r 'keys[]' target/coverage.json); do
+          file_name=$(basename "$file_path")
+          
+          # Extract executed and not executed counts
+          EXECUTED=$(jq -r ".[\"$file_path\"] | map(select(.executed == true)) | length" target/coverage.json)
+          NOT_EXECUTED=$(jq -r ".[\"$file_path\"] | map(select(.executed == false)) | length" target/coverage.json)
+          
+          # Some files may not have coverage information
+          if [ -z "$EXECUTED" ] || [ "$EXECUTED" == "null" ]; then
+            EXECUTED=0
+          fi
+          if [ -z "$NOT_EXECUTED" ] || [ "$NOT_EXECUTED" == "null" ]; then
+            NOT_EXECUTED=0
+          fi
+          
+          # Calculate total and coverage percentage
+          TOTAL=$((EXECUTED + NOT_EXECUTED))
+          
+          if [ $TOTAL -gt 0 ]; then
+            COVERAGE_PERCENT=$(echo "scale=2; $EXECUTED * 100 / $TOTAL" | bc)
+          else
+            COVERAGE_PERCENT="0.00"
+          fi
+          
+          # Add to totals
+          TOTAL_EXECUTED=$((TOTAL_EXECUTED + EXECUTED))
+          TOTAL_NOT_EXECUTED=$((TOTAL_NOT_EXECUTED + NOT_EXECUTED))
+          
+          # Write to report
+          echo "| $file_name | $EXECUTED | $NOT_EXECUTED | $TOTAL | ${COVERAGE_PERCENT}% |" >> ${{ inputs.report_path }}/coverage_report.md
+        done
+
+        # Calculate overall coverage
+        TOTAL=$((TOTAL_EXECUTED + TOTAL_NOT_EXECUTED))
+        if [ $TOTAL -gt 0 ]; then
+          TOTAL_COVERAGE=$(echo "scale=2; $TOTAL_EXECUTED * 100 / $TOTAL" | bc)
+        else
+          TOTAL_COVERAGE="0.00"
+        fi
+
+        # Add summary row
+        echo "" >> ${{ inputs.report_path }}/coverage_report.md
+        echo "## Overall Coverage: ${TOTAL_COVERAGE}%" >> ${{ inputs.report_path }}/coverage_report.md
+        echo "" >> ${{ inputs.report_path }}/coverage_report.md
+        echo "**Total:** $TOTAL_EXECUTED executed, $TOTAL_NOT_EXECUTED not executed, $TOTAL total items" >> ${{ inputs.report_path }}/coverage_report.md
+
+        # Add last update time
+        DATE=$(date "+%Y-%m-%d %H:%M:%S")
+        echo "" >> ${{ inputs.report_path }}/coverage_report.md
+        echo "Last updated: $DATE" >> ${{ inputs.report_path }}/coverage_report.md
+
+        # Save coverage value to file
+        echo "$TOTAL_COVERAGE" > ${{ inputs.report_path }}/coverage_value.txt
+
+        # Output result
+        echo "Coverage analysis completed: $TOTAL_COVERAGE%"
+
+    # Update coverage badge in README files
+    - name: Update coverage badge in README files
+      shell: bash
+      if: ${{ inputs.auto_commit == 'true' }}
+      run: |
+        # Read coverage value
+        COVERAGE_VALUE=$(cat ${{ inputs.report_path }}/coverage_value.txt)
+        echo "Coverage: $COVERAGE_VALUE%"
+
+        # Set badge color based on coverage value
+        if (( $(echo "$COVERAGE_VALUE >= 90" | bc -l) )); then
+          COLOR="brightgreen"
+        elif (( $(echo "$COVERAGE_VALUE >= 80" | bc -l) )); then
+          COLOR="green"
+        elif (( $(echo "$COVERAGE_VALUE >= 70" | bc -l) )); then
+          COLOR="yellowgreen"
+        elif (( $(echo "$COVERAGE_VALUE >= 60" | bc -l) )); then
+          COLOR="yellow"
+        elif (( $(echo "$COVERAGE_VALUE >= 50" | bc -l) )); then
+          COLOR="orange"
+        else
+          COLOR="red"
+        fi
+
+        # Create badge URL
+        BADGE_URL="https://img.shields.io/badge/coverage-${COVERAGE_VALUE}%25-${COLOR}"
+          
+        # Create coverage section content
+        COV_SECTION="[![Coverage](${BADGE_URL})](${{ inputs.report_path }}/coverage_report.md)"
+          
+        # Update all README files
+        for readme_file in $README_FILES; do
+          if [ -f "$readme_file" ]; then
+            echo "Updating coverage badge in $readme_file..."
+            if grep -q "\[\!\[Coverage\]" "$readme_file"; then
+              sed -i 's|\[\!\[Coverage\].*|'"${COV_SECTION}"'|' "$readme_file"
+            else
+              echo "No coverage badge found in $readme_file, adding one..."
+              echo "" >> "$readme_file"
+              echo "$COV_SECTION" >> "$readme_file"
+            fi
+          else
+            echo "Warning: $readme_file not found, skipping"
+          fi
+        done
+
+    # Commit and push changes
+    - name: Commit and push changes
+      shell: bash
+      if: ${{ inputs.auto_commit == 'true' }}
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+
+        # Add modified README files
+        for readme_file in $README_FILES; do
+          if [ -f "$readme_file" ]; then
+            git add "$readme_file"
+          fi
+        done
+
+        # Add coverage reports
+        git add ${{ inputs.report_path }}/coverage_report.md
+
+        git commit -m "Update coverage report [auto]" || echo "No changes to commit"
+        git push || echo "No changes to push"
+
+    # Upload coverage results as build artifacts
+    - name: Upload coverage results
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-results
+        path: |
+          target/coverage.json
+          ${{ inputs.report_path }}/coverage_report.md
+          ${{ inputs.report_path }}/coverage_value.txt

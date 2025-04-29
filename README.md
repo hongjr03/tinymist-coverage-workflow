@@ -28,9 +28,11 @@ on:
 
 jobs:
   coverage:
-    uses: hongjr03/tinymist-coverage-workflow@v0.1.0
-    with:
-      target_files: 'README.typ'  # Your main Typst file
+    runs-on: ubuntu-latest
+    steps:
+      - uses: hongjr03/tinymist-coverage-workflow@v0.1.0
+        with:
+          target_files: 'README.typ'  # Your main Typst file
 ```
 
 ### Advanced Configuration
@@ -51,14 +53,16 @@ Example with all options:
 ```yaml
 jobs:
   coverage:
-    uses: hongjr03/tinymist-coverage-workflow@v0.1.0
-    with:
-      tinymist_version: 'v0.13.10'
-      setup_typship: false
-      target_files: 'main.typ,docs/guide.typ'
-      report_path: 'docs/coverage'
-      auto_commit: false
-      readme_paths: 'README.md'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: hongjr03/tinymist-coverage-workflow@v0.1.0
+        with:
+          tinymist_version: 'v0.13.10'
+          setup_typship: false
+          target_files: 'main.typ,docs/guide.typ'
+          report_path: 'docs/coverage'
+          auto_commit: false
+          readme_paths: 'README.md'
 ```
 
 ## Coverage Badge

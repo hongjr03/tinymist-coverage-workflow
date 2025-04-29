@@ -28,9 +28,11 @@ on:
 
 jobs:
   coverage:
-    uses: hongjr03/tinymist-coverage-workflow@v0.1.0
-    with:
-      target_files: 'README.typ'  # 您的主要 Typst 文件
+    runs-on: ubuntu-latest
+    steps:
+      - uses: hongjr03/tinymist-coverage-workflow@v0.1.0
+        with:
+          target_files: 'README.typ'  # 您的主要 Typst 文件
 ```
 
 ### 高级配置
@@ -51,14 +53,16 @@ jobs:
 ```yaml
 jobs:
   coverage:
-    uses: hongjr03/tinymist-coverage-workflow@v0.1.0
-    with:
-      tinymist_version: 'latest'
-      setup_typship: false
-      target_files: 'main.typ,docs/guide.typ'
-      report_path: 'docs/coverage'
-      auto_commit: false
-      readme_paths: 'README.md'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: hongjr03/tinymist-coverage-workflow@v0.1.0
+        with:
+          tinymist_version: 'latest'
+          setup_typship: false
+          target_files: 'main.typ,docs/guide.typ'
+          report_path: 'docs/coverage'
+          auto_commit: false
+          readme_paths: 'README.md'
 ```
 
 ## 覆盖率徽章
