@@ -1,0 +1,20 @@
+name: Coverage Analysis Without Typship
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  coverage:
+    name: Run Coverage Analysis
+    uses: username/tinymist-cov/.github/workflows/tinymist-coverage.yml@main
+    with:
+      # 禁用 typship 开发环境设置
+      setup_typship: false
+      # 分析单个文件
+      target_files: 'document.typ'
+      # 禁用自动提交
+      auto_commit: false

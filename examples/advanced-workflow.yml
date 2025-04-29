@@ -1,0 +1,28 @@
+name: Advanced Coverage Analysis
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  # 每周运行一次
+  schedule:
+    - cron: '0 0 * * 0'  # 每周日午夜运行
+  workflow_dispatch:
+
+jobs:
+  coverage:
+    name: Run Advanced Coverage Analysis
+    uses: username/tinymist-cov/.github/workflows/tinymist-coverage.yml@main
+    with:
+      # 使用特定版本的 Tinymist
+      tinymist_version: 'v0.14.0'
+      # 分析多个文件
+      target_files: 'main.typ,docs/guide.typ,examples/demo.typ'
+      # 自定义报告路径
+      report_path: 'docs/coverage-reports'
+      # 只在 README.md 中更新徽章
+      readme_paths: 'README.md'
+    secrets:
+      # 可选：使用自定义 token 提交更改
+      GITHUB_TOKEN: ${{ secrets.CUSTOM_GH_TOKEN }}

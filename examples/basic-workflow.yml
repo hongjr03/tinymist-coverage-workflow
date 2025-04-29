@@ -1,0 +1,16 @@
+name: Basic Coverage Analysis
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  coverage:
+    name: Run Coverage Analysis
+    uses: username/tinymist-cov/.github/workflows/tinymist-coverage.yml@main
+    with:
+      # Just use the default settings
+      target_files: 'README.typ'
