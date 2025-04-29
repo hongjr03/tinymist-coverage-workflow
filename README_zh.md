@@ -28,7 +28,7 @@ on:
 
 jobs:
   coverage:
-    uses: your-username/tinymist-cov/.github/workflows/tinymist-coverage.yml@main
+    uses: hongjr03/tinymist-coverage-workflow/.github/workflows/tinymist-coverage.yml@main
     with:
       target_files: 'README.typ'  # 您的主要 Typst 文件
 ```
@@ -39,7 +39,7 @@ jobs:
 
 | 输入参数 | 描述 | 默认值 |
 |---------|------|--------|
-| `tinymist_version` | 使用的 Tinymist 版本 | `v0.13.10` |
+| `tinymist_version` | 使用的 Tinymist 版本 | `latest` |
 | `setup_typship` | 是否设置 typship 开发环境 | `true` |
 | `target_files` | 要分析的文件（逗号分隔） | `README.typ` |
 | `report_path` | 存储覆盖率报告的路径 | `coverage/output` |
@@ -51,9 +51,9 @@ jobs:
 ```yaml
 jobs:
   coverage:
-    uses: your-username/tinymist-cov/.github/workflows/tinymist-coverage.yml@main
+    uses: hongjr03/tinymist-coverage-workflow/.github/workflows/tinymist-coverage.yml@main
     with:
-      tinymist_version: 'v0.14.0'
+      tinymist_version: 'latest'
       setup_typship: false
       target_files: 'main.typ,docs/guide.typ'
       report_path: 'docs/coverage'

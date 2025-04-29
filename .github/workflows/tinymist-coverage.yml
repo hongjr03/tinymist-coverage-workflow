@@ -7,7 +7,7 @@ on:
         description: 'Tinymist version to use'
         required: false
         type: string
-        default: 'v0.13.10'
+        default: 'latest'
       setup_typship:
         description: 'Whether to setup typship development environment'
         required: false
@@ -84,8 +84,13 @@ jobs:
       - name: Install Tinymist
         run: |
           if ! command -v tinymist &> /dev/null; then
-            echo "Installing tinymist version ${{ inputs.tinymist_version }}..."
-            curl --proto '=https' --tlsv1.2 -LsSf https://github.com/Myriad-Dreamin/tinymist/releases/download/${{ inputs.tinymist_version }}/tinymist-installer.sh | sh
+            if [ "${{ inputs.tinymist_version }}" = "latest" ]; then
+              echo "Installing latest tinymist version..."
+              curl --proto '=https' --tlsv1.2 -LsSf https://github.com/Myriad-Dreamin/tinymist/releases/latest/download/tinymist-installer.sh | sh
+            else
+              echo "Installing tinymist version ${{ inputs.tinymist_version }}..."
+              curl --proto '=https' --tlsv1.2 -LsSf https://github.com/Myriad-Dreamin/tinymist/releases/download/${{ inputs.tinymist_version }}/tinymist-installer.sh | sh
+            fi
           else
             echo "tinymist is already installed"
           fi

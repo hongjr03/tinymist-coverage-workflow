@@ -28,7 +28,7 @@ on:
 
 jobs:
   coverage:
-    uses: hongjr03/tinymist-cov/.github/workflows/tinymist-coverage.yml@main
+    uses: hongjr03/tinymist-coverage-workflow/.github/workflows/tinymist-coverage.yml@main
     with:
       target_files: 'README.typ'  # Your main Typst file
 ```
@@ -39,7 +39,7 @@ You can customize the workflow with the following inputs:
 
 | Input | Description | Default |
 |-------|-------------|---------|
-| `tinymist_version` | Version of Tinymist to use | `v0.13.10` |
+| `tinymist_version` | Version of Tinymist to use | `latest` |
 | `setup_typship` | Whether to setup typship development environment | `true` |
 | `target_files` | Files to analyze (comma separated) | `README.typ` |
 | `report_path` | Path to store coverage reports | `coverage/output` |
@@ -51,9 +51,9 @@ Example with all options:
 ```yaml
 jobs:
   coverage:
-    uses: your-username/tinymist-cov/.github/workflows/tinymist-coverage.yml@main
+    uses: hongjr03/tinymist-coverage-workflow/.github/workflows/tinymist-coverage.yml@main
     with:
-      tinymist_version: 'v0.14.0'
+      tinymist_version: 'v0.13.10'
       setup_typship: false
       target_files: 'main.typ,docs/guide.typ'
       report_path: 'docs/coverage'

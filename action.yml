@@ -1,0 +1,43 @@
+name: 'Tinymist Coverage Analysis'
+description: 'Generate and track code coverage for Typst documents using Tinymist'
+author: 'hongjr03'
+branding:
+  icon: 'bar-chart-2'
+  color: 'blue'
+inputs:
+  tinymist_version:
+    description: 'Tinymist version to use'
+    required: false
+    default: 'latest'
+  setup_typship:
+    description: 'Whether to setup typship development environment'
+    required: false
+    default: 'true'
+  target_files:
+    description: 'Files to analyze for coverage (comma separated list)'
+    required: false
+    default: 'README.typ'
+  report_path:
+    description: 'Path to store coverage reports'
+    required: false
+    default: 'coverage/output'
+  auto_commit:
+    description: 'Whether to automatically commit coverage report updates'
+    required: false
+    default: 'true'
+  readme_paths:
+    description: 'Paths to README files to update with coverage badge (comma separated)'
+    required: false
+    default: 'README.md,README_zh.md'
+runs:
+  using: 'composite'
+  steps:
+    - name: Run Tinymist Coverage Workflow
+      uses: ./.github/workflows/tinymist-coverage.yml
+      with:
+        tinymist_version: ${{ inputs.tinymist_version }}
+        setup_typship: ${{ inputs.setup_typship }}
+        target_files: ${{ inputs.target_files }}
+        report_path: ${{ inputs.report_path }}
+        auto_commit: ${{ inputs.auto_commit }}
+        readme_paths: ${{ inputs.readme_paths }}
